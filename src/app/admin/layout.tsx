@@ -1,10 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth/logout", {
+        method: "POST",
+      });
+      router.push("/admin/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -16,7 +33,7 @@ export default function AdminLayout({
                 Painel Administrativo
               </h1>
             </div>
-            <nav className="flex space-x-8">
+            <nav className="flex items-center space-x-8">
               <Link
                 href="/admin/logs"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
@@ -35,6 +52,12 @@ export default function AdminLayout({
               >
                 Voltar ao Site
               </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Sair
+              </button>
             </nav>
           </div>
         </div>
