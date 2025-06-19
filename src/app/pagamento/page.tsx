@@ -114,37 +114,58 @@ export default function Pagamento() {
   const [copied, setCopied] = useState(false);
   
   useEffect(() => {
-    // Buscar chave PIX e valor do backend
-    fetch("/api/pix").then(async r => {
-      const contentType = r.headers.get("content-type");
-      if (r.ok && contentType && contentType.includes("application/json")) {
-        const data = await r.json();
-        setChavePix(data.key || "");
-        
-        // Usar o valor do painel admin se disponível, ou usar valor padrão
-        const valorPix = data.value !== null ? data.value : 49.90;
-        setValor(valorPix);
-        
-        console.log("Dados PIX recebidos:", { chave: data.key, valor: valorPix });
-        
-        // Montar código PIX usando a nova função que segue o padrão do Banco Central
-        const pix = gerarCodigoPix({
-          chave: data.key || "00000000000",
-          nome: "Servico CNH", 
-          cidade: "SAO PAULO",
-          valor: valorPix,
-          txid: "CNHSRV" + new Date().getTime().toString().slice(-8),
-          descricao: "Pagamento Servico CNH"
+    // Função para buscar dados PIX
+    const buscarDadosPix = async () => {
+      try {
+        // Adicionar timestamp para evitar cache
+        const timestamp = Date.now();
+        const response = await fetch(`/api/pix?t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
         });
         
-        setPixCopiaCola(pix);
-        console.log("Código PIX gerado:", pix);
+        const contentType = response.headers.get("content-type");
+        if (response.ok && contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setChavePix(data.key || "");
+          
+          // Usar o valor do painel admin se disponível, ou usar valor padrão
+          const valorPix = data.value !== null ? data.value : 49.90;
+          setValor(valorPix);
+          
+          console.log("Dados PIX recebidos:", { chave: data.key, valor: valorPix, timestamp: data.timestamp });
+          
+          // Montar código PIX usando a nova função que segue o padrão do Banco Central
+          const pix = gerarCodigoPix({
+            chave: data.key || "00000000000",
+            nome: "Servico CNH", 
+            cidade: "SAO PAULO",
+            valor: valorPix,
+            txid: "CNHSRV" + new Date().getTime().toString().slice(-8),
+            descricao: "Pagamento Servico CNH"
+          });
+          
+          setPixCopiaCola(pix);
+          console.log("Código PIX gerado:", pix);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar chave PIX:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }).catch(err => {
-      console.error("Erro ao buscar chave PIX:", err);
-      setLoading(false);
-    });
+    };
+
+    // Buscar dados inicialmente
+    buscarDadosPix();
+
+    // Configurar polling para verificar mudanças a cada 5 segundos
+    const interval = setInterval(buscarDadosPix, 5000);
+
+    // Cleanup do interval
+    return () => clearInterval(interval);
   }, []);
 
   return (

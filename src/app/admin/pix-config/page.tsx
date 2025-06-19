@@ -53,8 +53,14 @@ export default function PixConfigPage() {
       });
 
       if (response.ok) {
-        setMessage("Configuração PIX atualizada com sucesso!");
+        setMessage("✅ Configuração PIX atualizada com sucesso! As mudanças são aplicadas IMEDIATAMENTE na página de pagamento.");
         setMessageType("success");
+        
+        // Limpar mensagem após 5 segundos
+        setTimeout(() => {
+          setMessage("");
+          setMessageType("");
+        }, 5000);
       } else {
         const error = await response.text();
         setMessage(`Erro ao atualizar: ${error}`);
@@ -77,6 +83,7 @@ export default function PixConfigPage() {
           </h1>
           <p className="mt-2 text-sm text-gray-700">
             Configure a chave PIX e o valor que aparecerão no QR Code de pagamento.
+            <strong className="text-blue-600"> As mudanças são aplicadas instantaneamente!</strong>
           </p>
         </div>
       </div>
