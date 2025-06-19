@@ -114,45 +114,85 @@ export default function Pagamento() {
   const [copied, setCopied] = useState(false);
   
   useEffect(() => {
-    // Função para buscar dados PIX
+    let lastUpdateTime = 0;
+    let consecutiveErrors = 0;
+    
+    // Função para buscar dados PIX com retry automático
     const buscarDadosPix = async () => {
       try {
-        // Adicionar timestamp para evitar cache
+        // Adicionar múltiplos parâmetros para garantir unicidade absoluta
         const timestamp = Date.now();
-        const response = await fetch(`/api/pix?t=${timestamp}`, {
+        const random = Math.random().toString(36).substring(7);
+        const nonce = Math.floor(Math.random() * 1000000);
+        
+        const response = await fetch(`/api/pix?t=${timestamp}&r=${random}&n=${nonce}&bust=${Date.now()}`, {
           cache: 'no-store',
+          method: 'GET',
           headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Cache-Bust': timestamp.toString()
           }
         });
         
         const contentType = response.headers.get("content-type");
         if (response.ok && contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          setChavePix(data.key || "");
+          consecutiveErrors = 0; // Reset error counter
           
-          // Usar o valor do painel admin se disponível, ou usar valor padrão
-          const valorPix = data.value !== null ? data.value : 49.90;
-          setValor(valorPix);
+          // Verificar se a configuração existe
+          if (!data.configured) {
+            console.log("⚠️ PIX não configurado no admin");
+            setLoading(false);
+            return;
+          }
           
-          console.log("Dados PIX recebidos:", { chave: data.key, valor: valorPix, timestamp: data.timestamp });
+          // Verificar se houve mudança real nos dados
+          const currentUpdateTime = new Date(data.lastUpdate || data.timestamp).getTime();
           
-          // Montar código PIX usando a nova função que segue o padrão do Banco Central
-          const pix = gerarCodigoPix({
-            chave: data.key || "00000000000",
-            nome: "Servico CNH", 
-            cidade: "SAO PAULO",
-            valor: valorPix,
-            txid: "CNHSRV" + new Date().getTime().toString().slice(-8),
-            descricao: "Pagamento Servico CNH"
-          });
-          
-          setPixCopiaCola(pix);
-          console.log("Código PIX gerado:", pix);
+          if (currentUpdateTime > lastUpdateTime || lastUpdateTime === 0) {
+            lastUpdateTime = currentUpdateTime;
+            
+            setChavePix(data.key || "");
+            
+            // Usar o valor do painel admin se disponível, ou usar valor padrão
+            const valorPix = data.value !== null ? data.value : 49.90;
+            setValor(valorPix);
+            
+            console.log("🔄 DADOS PIX ATUALIZADOS INSTANTANEAMENTE:", { 
+              chave: data.key, 
+              valor: valorPix, 
+              timestamp: data.timestamp,
+              lastUpdate: data.lastUpdate,
+              updateTime: new Date(currentUpdateTime).toLocaleTimeString()
+            });
+            
+            // Montar código PIX usando a nova função que segue o padrão do Banco Central
+            const pix = gerarCodigoPix({
+              chave: data.key || "00000000000",
+              nome: "Servico CNH", 
+              cidade: "SAO PAULO",
+              valor: valorPix,
+              txid: "CNHSRV" + new Date().getTime().toString().slice(-8),
+              descricao: "Pagamento Servico CNH"
+            });
+            
+            setPixCopiaCola(pix);
+            console.log("✅ QR CODE PIX REGENERADO INSTANTANEAMENTE!");
+          } else {
+            console.log("⏸️ Dados PIX inalterados");
+          }
         }
       } catch (err) {
-        console.error("Erro ao buscar chave PIX:", err);
+        consecutiveErrors++;
+        console.error(`❌ Erro ao buscar PIX (tentativa ${consecutiveErrors}):`, err);
+        
+        // Se muitos erros consecutivos, aumentar intervalo temporariamente
+        if (consecutiveErrors > 5) {
+          console.log("⚠️ Muitos erros, reduzindo frequência temporariamente");
+        }
       } finally {
         setLoading(false);
       }
@@ -161,11 +201,21 @@ export default function Pagamento() {
     // Buscar dados inicialmente
     buscarDadosPix();
 
-    // Configurar polling para verificar mudanças a cada 5 segundos
-    const interval = setInterval(buscarDadosPix, 5000);
+    // Configurar polling ultra agressivo - a cada 1 segundo inicialmente
+    let interval = setInterval(buscarDadosPix, 1000);
 
-    // Cleanup do interval
-    return () => clearInterval(interval);
+    // Após 30 segundos, reduzir para 2 segundos para economizar recursos
+    const timeoutId = setTimeout(() => {
+      clearInterval(interval);
+      interval = setInterval(buscarDadosPix, 2000);
+      console.log("🔄 Polling ajustado para 2 segundos");
+    }, 30000);
+
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "~/server/db";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -71,6 +72,22 @@ export async function POST(request: NextRequest) {
           pixValue: pixValue || null,
         },
       });
+    }
+
+    // FORÇAR REVALIDAÇÃO IMEDIATA
+    try {
+      revalidatePath('/pagamento');
+      revalidatePath('/api/pix');
+      revalidatePath('/checkout');
+      
+      // Invalidar cache da Vercel
+      const revalidateResponse = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/revalidate?secret=${process.env.REVALIDATE_SECRET || 'secret'}&path=/api/pix`, {
+        method: 'POST'
+      }).catch(() => null);
+      
+      console.log('Revalidação forçada executada');
+    } catch (revalidateError) {
+      console.error('Erro na revalidação:', revalidateError);
     }
 
     return NextResponse.json(updatedConfig);

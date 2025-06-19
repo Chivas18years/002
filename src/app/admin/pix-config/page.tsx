@@ -53,14 +53,61 @@ export default function PixConfigPage() {
       });
 
       if (response.ok) {
-        setMessage("✅ Configuração PIX atualizada com sucesso! As mudanças são aplicadas IMEDIATAMENTE na página de pagamento.");
+        setMessage("✅ Configuração PIX atualizada com sucesso! As mudanças são aplicadas INSTANTANEAMENTE na página de pagamento.");
         setMessageType("success");
         
-        // Limpar mensagem após 5 segundos
+        // FORÇAR MÚLTIPLAS ESTRATÉGIAS DE ATUALIZAÇÃO IMEDIATA
+        try {
+          // 1. Chamar API de revalidação múltiplas vezes
+          const revalidatePromises = [
+            fetch('/api/revalidate?secret=secret&path=/api/pix', { method: 'POST' }),
+            fetch('/api/revalidate?secret=secret&path=/pagamento', { method: 'POST' }),
+            fetch('/api/revalidate?secret=secret', { method: 'POST' })
+          ];
+          
+          await Promise.allSettled(revalidatePromises);
+          
+          // 2. Fazer múltiplas requisições de teste para "aquecer" o cache
+          const testPromises = [];
+          for (let i = 0; i < 5; i++) {
+            testPromises.push(
+              fetch(`/api/pix?t=${Date.now()}&test=${i}&force=true&bust=${Math.random()}`, {
+                cache: 'no-store',
+                headers: {
+                  'Cache-Control': 'no-cache, no-store, must-revalidate',
+                  'Pragma': 'no-cache'
+                }
+              })
+            );
+          }
+          
+          await Promise.allSettled(testPromises);
+          
+          // 3. Log de confirmação
+          console.log('🚀 FORÇANDO ATUALIZAÇÃO IMEDIATA - MÚLTIPLAS ESTRATÉGIAS EXECUTADAS');
+          
+          // 4. Teste final após 2 segundos
+          setTimeout(async () => {
+            try {
+              const finalTest = await fetch(`/api/pix?final_test=${Date.now()}&r=${Math.random()}`, {
+                cache: 'no-store'
+              });
+              const finalData = await finalTest.json();
+              console.log('🎯 TESTE FINAL - Dados PIX após forçar atualização:', finalData);
+            } catch (e) {
+              console.error('Erro no teste final:', e);
+            }
+          }, 2000);
+          
+        } catch (forceError) {
+          console.error('Erro ao forçar atualização:', forceError);
+        }
+        
+        // Limpar mensagem após 8 segundos (mais tempo para ver o resultado)
         setTimeout(() => {
           setMessage("");
           setMessageType("");
-        }, 5000);
+        }, 8000);
       } else {
         const error = await response.text();
         setMessage(`Erro ao atualizar: ${error}`);
