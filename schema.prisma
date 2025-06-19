@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Definido para PostgreSQL (Neon)
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  name        String    @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+}
+
+model PixConfig {
+  id        String   @id @default(cuid())
+  pixKey    String
+  pixValue  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  cpf            String?   @unique
+  phone          String?
+  ipAddress      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  // --- NOVAS COLUNAS ADICIONADAS AQUI ---
+  birthDate      String?   // Campo para data de nascimento
+  cnhType        String?   // Tipo de CNH (ex: "A", "B", "AB")
+  cnhCategory    String?   // Categoria da CNH (ex: "carro", "moto")
+  address        String?
+  cep            String?
+  uf             String?
+  city           String?
+  serviceRequested String? // Ex: "A - Carro"
+  paymentStatus  String?   // Ex: "pending", "paid", "failed"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?
+  role          String    @default("user")
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]    // Adicionado para o relacionamento inverso (um User pode ter vários Posts)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
