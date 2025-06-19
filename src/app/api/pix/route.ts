@@ -10,30 +10,21 @@ export async function GET() {
       },
     });
     
-    if (config) {
-      // Converter o valor para número se existir
-      const pixValue = config.pixValue ? parseFloat(config.pixValue) : null;
-      
-      // Adicionar timestamp para evitar cache
-      const response = NextResponse.json({ 
-        key: config.pixKey,
-        value: pixValue,
-        timestamp: Date.now()
+    // Se não tem config no banco → não gera QR Code
+    if (!config) {
+      return NextResponse.json({ 
+        error: "Chave PIX não configurada",
+        configured: false 
       });
-      
-      // Headers para evitar cache
-      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-      response.headers.set('Pragma', 'no-cache');
-      response.headers.set('Expires', '0');
-      response.headers.set('Surrogate-Control', 'no-store');
-      
-      return response;
     }
     
-    // Fallback para a chave padrão se não houver configuração
+    // Converter o valor para número se existir
+    const pixValue = config.pixValue ? parseFloat(config.pixValue) : null;
+    
+    // Adicionar timestamp para evitar cache
     const response = NextResponse.json({ 
-      key: "b6399e0e-80f6-4b0b-b773-8a738569699b",
-      value: 43.34,
+      key: config.pixKey,
+      value: pixValue,
       timestamp: Date.now()
     });
     
