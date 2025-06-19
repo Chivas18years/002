@@ -23,3 +23,6 @@ export const getDb = () => {
 
   return global.prismaGlobal;
 };
+
+// Exportar também como db para compatibilidade
+export const db = getDb();
