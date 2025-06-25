@@ -3,72 +3,44 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["@prisma/client"],
   },
-  // Configurações agressivas para eliminar cache
-  async headers() {
+
+  async redirects() {
     return [
       {
+        source: '/ignite',
+        destination: '/ignite/login',
+        permanent: true,
+      },
+    ];
+  },
+
+  async headers() {
+    return [
+      // ... (suas outras regras de headers que já estavam certas)
+      {
         source: '/api/pix',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
-          },
-          {
-            key: 'CDN-Cache-Control',
-            value: 'no-store',
-          },
-          {
-            key: 'Vercel-CDN-Cache-Control',
-            value: 'no-store',
-          },
-          {
-            key: 'Surrogate-Control',
-            value: 'no-store',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
-          },
-        ],
+        headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0' }, /* ... */ ],
       },
       {
         source: '/api/admin/pix-config',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          },
-        ],
+        headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } ],
       },
       {
         source: '/pagamento',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          },
-        ],
+        headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } ],
       },
       {
-        source: '/admin/:path*',
+        source: '/ignite/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          },
+          { key: 'Cache-control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' },
         ],
       },
     ];
   },
-  // Configurações adicionais para Vercel
+
   env: {
     DISABLE_CACHE: 'true',
   },
 };
 
 export default nextConfig;
-
