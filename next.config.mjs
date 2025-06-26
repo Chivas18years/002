@@ -16,13 +16,12 @@ const nextConfig = {
 
   async headers() {
     return [
-      // ... (suas outras regras de headers que já estavam certas)
       {
         source: '/api/pix',
-        headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0' }, /* ... */ ],
+        headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0' } ],
       },
       {
-        source: '/api/admin/pix-config',
+        source: '/api/ignite/pix-config', // <-- AQUI A CORREÇÃO
         headers: [ { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } ],
       },
       {

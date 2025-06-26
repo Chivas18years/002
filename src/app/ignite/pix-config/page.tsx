@@ -24,7 +24,7 @@ export default function PixConfigPage() {
 
   const loadCurrentConfig = async () => {
     try {
-      const response = await fetch("/api/admin/pix-config");
+      const response = await fetch("/api/ignite/pix-config");
       if (response.ok) {
         const config: PixConfig = await response.json();
         setPixKey(config.pixKey);
@@ -41,7 +41,7 @@ export default function PixConfigPage() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/admin/pix-config", {
+      const response = await fetch("/api/ignite/pix-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

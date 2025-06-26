@@ -1,10 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    // Or if using `src` directory:
+    // Esta é a única regra que você precisa. Ela vai achar os arquivos
+    // em /ignite e em todos os outros lugares dentro de 'src'.
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {

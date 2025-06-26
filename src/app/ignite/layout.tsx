@@ -12,10 +12,10 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth/logout", {
+      await fetch("/api/ignite/auth/logout", {
         method: "POST",
       });
-      router.push("/admin/login");
+      router.push("/ignite/login");
       router.refresh();
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
@@ -35,13 +35,13 @@ export default function AdminLayout({
             </div>
             <nav className="flex items-center space-x-8">
               <Link
-                href="/admin/logs"
+                href="/ignite/logs"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Logs de Clientes
               </Link>
               <Link
-                href="/admin/pix-config"
+                href="/ignite/pix-config"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Configurar PIX
