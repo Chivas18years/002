@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Adicionamos um console.log aqui fora para ver se o arquivo é carregado.
-console.log("Arquivo da página de login carregado.");
-
 export default function AdminLoginPage() {
-  // Adicionamos um console.log aqui dentro para ver se o componente é executado.
-  console.log("Componente AdminLoginPage está sendo renderizado.");
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,24 +25,18 @@ export default function AdminLoginPage() {
       });
 
       if (response.ok) {
-        console.log("Login OK! Redirecionando...");
-        router.push("/ignite/dashboard");
+        router.push("/ignite/dashboard"); // <- Verifique se este é o caminho certo do seu painel principal
         router.refresh();
       } else {
         const errorData = await response.json();
-        console.error("Erro no login:", errorData);
         setError(errorData.error || "Credenciais inválidas");
       }
     } catch (error) {
-      console.error("Erro de conexão no fetch:", error);
       setError("Erro de conexão. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
-  
-  // Adicionamos um console.log final para ver se ele chega na parte de renderizar o HTML.
-  console.log("Preparando para retornar o JSX do formulário.");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -62,7 +50,6 @@ export default function AdminLoginPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* O seu formulário completo vai aqui, como estava antes */}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">Usuário</label>

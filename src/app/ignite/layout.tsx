@@ -24,7 +24,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header do Painel */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -34,22 +34,13 @@ export default function AdminLayout({
               </h1>
             </div>
             <nav className="flex items-center space-x-8">
-              <Link
-                href="/ignite/logs"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
+              <Link href="/ignite/logs" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                 Logs de Clientes
               </Link>
-              <Link
-                href="/ignite/pix-config"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
+              <Link href="/ignite/pix-config" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                 Configurar PIX
               </Link>
-              <Link
-                href="/"
-                className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium"
-              >
+              <Link href="/" className="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium">
                 Voltar ao Site
               </Link>
               <button
@@ -63,13 +54,12 @@ export default function AdminLayout({
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Conteúdo da Página (A 'Pintura') */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {children}
+          {children} 
         </div>
       </main>
     </div>
   );
 }
-
