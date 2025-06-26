@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
       });
 
       if (response.ok) {
-        router.push("/ignite/dashboard"); // <- Verifique se este é o caminho certo do seu painel principal
+        router.push("/ignite/logs"); // <- Verifique se este é o caminho certo do seu painel principal
         router.refresh();
       } else {
         const errorData = await response.json();
